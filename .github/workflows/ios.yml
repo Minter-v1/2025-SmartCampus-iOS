@@ -1,0 +1,74 @@
+name: iOS CI
+
+on:
+  push:
+    branches: [ main, feature ]
+  pull_request:
+    branches: [ main, feature ]
+
+jobs:
+  lint:
+    name: SwiftLint
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: SwiftLint
+      uses: norio-nomura/action-swiftlint@3.2.1
+      with:
+        args: --strict
+
+  test:
+    name: Test
+    runs-on: macos-14
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Select Xcode
+      run: sudo xcode-select -switch /Applications/Xcode_15.4.app/Contents/Developer
+      
+    - name: Xcode version
+      run: /usr/bin/xcodebuild -version
+      
+    - name: Build and Test
+      run: |
+        xcodebuild clean build test \
+          -project SmartCampus.xcodeproj \
+          -scheme SmartCampus \
+          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+          
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./DerivedData/Build/ProfileData/*/Coverage.profdata
+        fail_ci_if_error: false
+
+  build:
+    name: Build
+    runs-on: macos-14
+    needs: [lint]
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Select Xcode
+      run: sudo xcode-select -switch /Applications/Xcode_15.4.app/Contents/Developer
+      
+    - name: Build for Release
+      run: |
+        xcodebuild build \
+          -project SmartCampus.xcodeproj \
+          -scheme SmartCampus \
+          -configuration Release \
+          -destination 'generic/platform=iOS' \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
