@@ -14,8 +14,10 @@ struct UserSignUpRequest: Codable {
     let id: String
     let password: String
     let passwordCheck: String
+    let department: String
     let email: String
     let phoneNumber: String
+    let role: String
     let profilePhoto: String? //이미지 주소(존재하지 않을 수도 있음 = nil)
     
     //JSON 매핑용 enum
@@ -26,6 +28,8 @@ struct UserSignUpRequest: Codable {
         case passwordCheck = "password_check"
         case phoneNumber = "phone_number"
         case profilePhoto = "profile_photo"
+        case id, password, department, email, role
+        
     }
     
     
@@ -33,7 +37,7 @@ struct UserSignUpRequest: Codable {
 
 
 //MARK: - 로그인 요청 모델
-struct UserLogin: Codable {
+struct UserLoginRequest: Codable {
     let id: String
     let password: String
 }
@@ -41,11 +45,22 @@ struct UserLogin: Codable {
 
 //MARK: - 사용자 조회 응답 모델
 struct UserProfile: Codable {
-    let student_id: String //학번
+    let studentId: String //학번
     let id: String
     let name: String
     let department: String
     let phoneNumber: String
     let email: String
     let profilePhoto: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case studentId = "student_id"
+        case phoneNumber = "phone_number"
+        case profilePhoto = "profile_photo"
+        case id, name, department, email
+    }
 }
+
+
+//TODO: - API 응답 모델 정의
+//TODO: - 커스텀 에러 타입 정의
